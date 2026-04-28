@@ -9,8 +9,8 @@ export default function PurchaseOrdersPage() {
   return (
     <div className="space-y-6 text-black">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Purchase Orders</h1>
-        <p className="text-gray-500 text-sm">Daftar PO yang diterima dari PPIC Epson</p>
+        <h1 className="text-2xl font-extrabold text-[#1e293b]">Purchase Orders</h1>
+        <p className="text-slate-400 text-sm font-medium mt-1">Daftar PO yang diterima dari PPIC Epson</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

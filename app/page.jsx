@@ -26,7 +26,7 @@ export default function PilihRolePage() {
       {/* Header / Logo */}
       <div className="flex flex-col items-center mb-10">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/logoaivas.jpg" alt="Logo" className="w-10 h-10 rounded-md" />
+          <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain mix-blend-screen" />
           <h1 className="text-3xl font-bold">AIVAS</h1>
         </div>
         <p className="text-gray-300">Automated Inbound Verification & Analytics System</p>
