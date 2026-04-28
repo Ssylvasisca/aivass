@@ -13,7 +13,6 @@ function LoginContent() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-<<<<<<< HEAD
     // Arahkan ke halaman dashboard sesuai role
     if (role === "supervisor") {
       router.push("/supervisor");
@@ -24,9 +23,6 @@ function LoginContent() {
     } else {
       router.push("/vendor");
     }
-=======
-    router.push("/vendor");
->>>>>>> main
   };
 
   return (
