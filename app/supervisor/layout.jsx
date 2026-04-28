@@ -1,4 +1,4 @@
-import SupervisorSidebar from "../components/SupervisorSidebar";
+import Sidebar from "../components/Sidebar";
 
 export const metadata = {
   title: "AIVAS - Supervisor Dashboard",
@@ -9,7 +9,7 @@ export default function SupervisorLayout({ children }) {
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-800">
       {/* Sidebar */}
-      <SupervisorSidebar />
+      <Sidebar />
 
       {/* Area Konten Utama */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

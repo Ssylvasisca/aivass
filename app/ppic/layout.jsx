@@ -1,11 +1,11 @@
 import Sidebar from "../components/Sidebar";
 
 export const metadata = {
-  title: "AIVAS - Vendor Portal",
-  description: "Vendor Portal for AIVAS",
+  title: "AIVAS - PPIC Portal",
+  description: "PPIC Portal for AIVAS",
 };
 
-export default function VendorLayout({ children }) {
+export default function PpicLayout({ children }) {
   return (
     <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-800">
       {/* Sidebar */}
@@ -27,8 +27,8 @@ export default function VendorLayout({ children }) {
 
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <div className="text-sm font-bold text-slate-800 leading-tight">PT. Filkom Sejahtera</div>
-              <div className="text-xs text-slate-500">Vendor</div>
+              <div className="text-sm font-bold text-slate-800 leading-tight">Ahmad Fauzi</div>
+              <div className="text-xs text-slate-500">PPIC</div>
             </div>
             <div className="w-9 h-9 rounded-full bg-slate-200 overflow-hidden border border-slate-300">
                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-full h-full text-slate-400 mt-1.5">
