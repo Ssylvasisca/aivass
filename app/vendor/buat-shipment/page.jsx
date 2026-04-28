@@ -43,7 +43,7 @@ export default function BuatShipmentPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 text-slate-700 pb-20">
+    <div className="max-w-4xl space-y-8 text-slate-800 pb-20">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-extrabold text-[#1e293b]">Buat Delivery Order</h1>
