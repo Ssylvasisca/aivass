@@ -15,8 +15,8 @@ export default function PilihRolePage() {
 
   const handleLanjut = () => {
     if (roleTerpilih) {
-      // Pindah ke halaman login sambil membawa info role (bisa via query atau state management, disini kita push biasa dulu)
-      router.push("/login");
+      // Pindah ke halaman login sambil membawa info role
+      router.push(`/login?role=${roleTerpilih}`);
     }
   };
 

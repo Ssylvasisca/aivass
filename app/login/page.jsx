@@ -1,16 +1,32 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role");
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
+<<<<<<< HEAD
+    // Arahkan ke halaman dashboard sesuai role
+    if (role === "supervisor") {
+      router.push("/supervisor");
+    } else if (role === "admin") {
+      router.push("/admin"); // Jika nanti ada admin
+    } else if (role === "ppic") {
+      router.push("/ppic"); // Jika nanti ada ppic
+    } else {
+      router.push("/vendor");
+    }
+=======
     router.push("/vendor");
+>>>>>>> main
   };
 
   return (
@@ -88,7 +104,7 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-gradient-to-r from-[#3b82f6] to-[#2dd4bf] hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
             >
-              Masuk
+              Masuk {role ? `sebagai ${role}` : ""}
             </button>
           </form>
         </div>
@@ -106,5 +122,13 @@ export default function LoginPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
