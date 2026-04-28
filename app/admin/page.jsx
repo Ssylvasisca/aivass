@@ -102,13 +102,19 @@ export default function AdminScanPage() {
               Scan QR Code
             </h2>
 
-            <div className="border-2 border-dashed border-slate-300 rounded-xl h-64 bg-[#f8fafc] flex flex-col items-center justify-center text-center px-4">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-slate-400 mb-4">
+            <div 
+              onClick={() => {
+                setQrInput("AIVAS-SHP2026001-BOX001");
+                setTimeout(() => setStep(2), 500); // Simulate processing time
+              }}
+              className="border-2 border-dashed border-slate-300 rounded-xl h-64 bg-[#f8fafc] flex flex-col items-center justify-center text-center px-4 cursor-pointer hover:bg-slate-50 hover:border-[#2cb2e0] transition-colors group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-slate-400 mb-4 group-hover:text-[#2cb2e0] transition-colors">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
               </svg>
               <p className="text-sm font-medium text-slate-500">Kamera akan aktif untuk scan QR</p>
-              <p className="text-xs text-slate-400 mt-1">(Simulasi: input manual di bawah)</p>
+              <p className="text-xs text-slate-400 mt-1">(Simulasi: klik kotak ini atau masukkan manual di bawah)</p>
             </div>
 
             <div className="flex gap-3">
@@ -120,9 +126,15 @@ export default function AdminScanPage() {
                 onChange={(e) => setQrInput(e.target.value)}
               />
               <button 
-                onClick={handleScan}
-                disabled={!qrInput.trim()}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all ${qrInput.trim() ? 'bg-[#38bdf8] hover:bg-[#0284c7]' : 'bg-slate-300 cursor-not-allowed'}`}
+                onClick={() => {
+                  if (!qrInput.trim()) {
+                    setQrInput("AIVAS-SHP2026001-BOX001");
+                    setTimeout(() => setStep(2), 500);
+                  } else {
+                    setStep(2);
+                  }
+                }}
+                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all bg-[#38bdf8] hover:bg-[#0284c7]`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />

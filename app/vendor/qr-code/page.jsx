@@ -62,7 +62,10 @@ export default function QRCodeShipmentPage() {
             </svg>
             Download
           </button>
-          <button className="flex-1 flex justify-center items-center gap-2 bg-[#38bdf8] hover:bg-[#0284c7] rounded-lg py-2.5 text-sm font-bold text-white transition-colors shadow-sm shadow-blue-500/20">
+          <button 
+            onClick={() => window.print()}
+            className="flex-1 flex justify-center items-center gap-2 bg-[#38bdf8] hover:bg-[#0284c7] rounded-lg py-2.5 text-sm font-bold text-white transition-colors shadow-sm shadow-blue-500/20"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.724.092m6.524-4.316A8.962 8.962 0 0112 21c-4.97 0-9-4.03-9-9s4.03-9 9-9c1.658 0 3.21.448 4.5 1.229m2.25 3.328v6.75" />
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 15h.008v.008H17.25V15zM17.25 18h.008v.008H17.25V18zM17.25 21h.008v.008H17.25V21zM20.25 15h.008v.008H20.25V15zM20.25 18h.008v.008H20.25V18zM20.25 21h.008v.008H20.25V21z" />
