@@ -1,24 +1,15 @@
 "use client";
 
-import React from "react";
 
 export default function PpicDashboardPage() {
   return (
-    <div className="max-w-5xl space-y-6">
-      
+    <div className="space-y-6 text-black">
       {/* Header Section */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-blue-500 text-white rounded-xl flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
-          </svg>
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 leading-tight">Dashboard Analytics</h1>
-          <p className="text-sm text-slate-500">Monitoring performa supply chain & discrepancy secara real-time</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Dashboard Analytics</h1>
+        <p className="text-gray-500 text-sm mt-1">Monitoring performa supply chain & discrepancy secara real-time</p>
       </div>
-
+    
       {/* 4 Cards (Metrics) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Card 1 */}

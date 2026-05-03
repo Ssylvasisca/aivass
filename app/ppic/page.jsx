@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 
 export default function PpicPurchaseOrderPage() {
   const purchaseOrders = [
@@ -28,13 +27,13 @@ export default function PpicPurchaseOrderPage() {
   ];
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="space-y-6 text-black">
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Purchase Order</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola Dokumen Purchase Order</p>
-        </div>
+        <h1 className="text-3xl font-bold text-slate-900">Purchase Order</h1>
+        <p className="text-gray-500 text-sm mt-1">Kelola Dokumen Purchase Order</p>
+      </div>
         <button className="flex items-center gap-2 bg-[#38bdf8] hover:bg-blue-400 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />

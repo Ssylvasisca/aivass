@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 
 export default function ShipmentsPage() {
   const shipments = [
@@ -29,11 +28,11 @@ export default function ShipmentsPage() {
   ];
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="space-y-6 text-black">
       {/* Header Section */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tracking Shipment</h1>
-        <p className="text-sm text-slate-500 mt-1">Monitor status semua pengiriman</p>
+        <h1 className="text-3xl font-bold text-slate-900">Tracking Shipment</h1>
+        <p className="text-gray-500 text-sm mt-1">Monitor status semua pengiriman</p>
       </div>
 
       {/* Shipments List */}

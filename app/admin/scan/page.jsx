@@ -28,7 +28,7 @@ export default function ScanPage() {
         {step === 1 && (
           <div className="w-full max-w-lg text-center">
             <div className="mb-4 text-blue-600 font-bold flex items-center justify-center gap-2">
-              <span>📷</span> Scan QR Code
+              <span></span> Scan QR Code
             </div>
             <div className="border-2 border-dashed border-slate-200 rounded-2xl aspect-video flex flex-col items-center justify-center bg-slate-50 mb-6">
               <span className="text-4xl mb-2 text-slate-300">📷</span>

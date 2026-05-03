@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function BuatShipmentPage() {
   const router = useRouter();
@@ -63,11 +63,11 @@ export default function BuatShipmentPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+    <div className="space-y-6 text-black">
       {/* Header Section */}
       <div>
         <h1 className="text-3xl font-bold text-slate-900">Buat Delivery Order</h1>
-        <p className="text-sm text-slate-500 mt-1">PO-2026-001 • PT. Indonesia Epson Industry</p>
+        <p className="text-gray-500 text-sm mt-1">PO-2026-001 • PT. Indonesia Epson Industry</p>
       </div>
 
       {/* Boxes List */}
@@ -78,21 +78,25 @@ export default function BuatShipmentPage() {
             {/* Box Header & Box Delete */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-[#38bdf8]">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                </svg>
+                <img 
+                  src="/ic_boxblue.jpg" 
+                  alt="Box Icon" 
+                  className="w-6 h-6 object-contain mix-blend-multiply" 
+                />
                 <h2 className="text-base font-bold text-slate-800">{box.id}</h2>
               </div>
               
               {/* Box Delete Button at Top Right */}
               <button 
                 onClick={() => handleRemoveBox(boxIndex)}
-                className="text-red-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                className="hover:bg-red-50 p-2 rounded-lg transition-colors opacity-70 hover:opacity-100"
                 title="Hapus Box"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
+                <img 
+                  src="/ic_trash.jpg" 
+                  alt="Delete Box" 
+                  className="w-5 h-5 object-contain mix-blend-multiply" 
+                />
               </button>
             </div>
 
@@ -141,12 +145,14 @@ export default function BuatShipmentPage() {
                   <div className="pb-2">
                     <button 
                       onClick={() => handleRemoveItem(boxIndex, itemIndex)}
-                      className="text-slate-400 hover:text-red-500 transition-colors"
+                      className="transition-colors opacity-50 hover:opacity-100"
                       title="Hapus Item"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                      </svg>
+                      <img 
+                        src="/ic_trash.jpg" 
+                        alt="Delete Item" 
+                        className="w-5 h-5 object-contain mix-blend-multiply" 
+                      />
                     </button>
                   </div>
                 </div>
@@ -169,6 +175,7 @@ export default function BuatShipmentPage() {
 
       {/* Action Buttons */}
       <div className="flex gap-4 mt-8">
+        {/* Tambah Box Button*/}
         <button 
           onClick={handleAddBox}
           className="flex-1 flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-lg py-3.5 text-sm font-bold shadow-sm transition-colors"
@@ -182,9 +189,11 @@ export default function BuatShipmentPage() {
           onClick={handleGenerateQR}
           className="flex-[1.5] flex items-center justify-center gap-2 bg-[#38bdf8] hover:bg-[#0284c7] text-white rounded-lg py-3.5 text-sm font-bold shadow-sm shadow-blue-500/20 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-          </svg>
+          <img 
+            src="/ic_lock.jpg" 
+            alt="Lock Icon" 
+            className="w-5 h-5 object-contain opacity-90" 
+          />
           Kunci & Generate QR
         </button>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 // Initial dummy data for tickets
 const INITIAL_TICKETS = [
@@ -113,11 +113,11 @@ export default function DiscrepancyPage() {
   });
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="space-y-6 text-black">
       {/* Header Section */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Discrepancy Handling</h1>
-        <p className="text-sm text-slate-500 mt-1">Kelola tiket selisih pengiriman</p>
+        <h1 className="text-3xl font-bold text-slate-900">Discrepancy Handling</h1>
+        <p className="text-gray-500 text-sm mt-1">Kelola tiket selisih pengiriman</p>
       </div>
 
       {/* Filter Tabs */}
