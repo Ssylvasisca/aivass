@@ -1,316 +1,538 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function AdminScanPage() {
-  const [step, setStep] = useState(1);
-  const [qrInput, setQrInput] = useState("");
-  const [photoTaken, setPhotoTaken] = useState(false);
+export default function InboundScannerPage() {
+  // --- STATES ---
+  const [activeTab, setActiveTab] = useState("scan"); // 'scan' | 'hitung'
+  const [isScanned, setIsScanned] = useState(false); // Menandakan box sudah discan
+  const [activeItemIndex, setActiveItemIndex] = useState(0);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [qtyInput, setQtyInput] = useState("");
+  const [reasonInput, setReasonInput] = useState("");
+  const [finishComment, setFinishComment] = useState("");
+  
+  // State untuk error handling reject
+  const [rejectError, setRejectError] = useState(false);
+
+  // State untuk Waktu Realtime
   const [currentTime, setCurrentTime] = useState("");
 
-  useEffect(() => {
-    // Simulasi set timestamp saat halaman dimuat atau step berubah
-    const now = new Date();
-    setCurrentTime(now.toLocaleString('id-ID', {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    }).replace(/\./g, ':'));
-  }, [step]);
+  // Data Dummy berdasarkan UI
+  const [items, setItems] = useState([
+    { id: 1, name: "Ink Cartridge Black", code: "EPN-INK-001", expected: 250, actual: 0 },
+    { id: 2, name: "Print Head Assembly", code: "EPN-PH-002", expected: 100, actual: 0 },
+  ]);
 
-  const handleScan = () => {
-    if (qrInput.trim() !== "") {
-      setStep(2);
+  // --- EFFECT: REALTIME CLOCK ---
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      setCurrentTime(`${hours}:${minutes}:${seconds}`);
+    };
+
+    updateClock(); 
+    const intervalId = setInterval(updateClock, 1000); 
+
+    return () => clearInterval(intervalId); 
+  }, []);
+
+  // --- LOGIC HANDLERS ---
+  const handleSimulasiScan = () => {
+    setIsScanned(true);
+    setActiveTab("hitung");
+    // Otomatis mengisi angka qty aktual sesuai qty expected saat box di-scan
+    setItems(items.map(item => ({ ...item, actual: item.expected })));
+  };
+
+  const handleNextBatch = () => {
+    setIsScanned(false);
+    setActiveTab("scan");
+    setActiveItemIndex(0);
+    setQtyInput("");
+    setItems(items.map(item => ({ ...item, actual: 0 })));
+  };
+
+  // Menyelesaikan verifikasi dan mereset layar kembali ke awal (Scan)
+  const handleFinish = () => {
+    alert("Konfirmasi disimpan! Kembali ke menu Scan QR.");
+    
+    // Tutup modal dan bersihkan komentar
+    setShowFinishModal(false);
+    setFinishComment("");
+    
+    // Reset layar kembali ke state awal
+    setIsScanned(false);
+    setActiveTab("scan");
+    setActiveItemIndex(0);
+    setQtyInput("");
+    setItems(items.map(item => ({ ...item, actual: 0 })));
+  };
+
+  // Validasi & Submit Reject
+  const handleSubmitReject = () => {
+    if (!reasonInput.trim()) {
+      setRejectError(true);
+      return;
+    }
+    
+    alert("Reject dikirim sukses!");
+    setShowRejectModal(false);
+    setReasonInput("");
+    setRejectError(false);
+  };
+
+  const handleSimpanBukti = () => {
+    const updatedItems = [...items];
+    updatedItems[activeItemIndex].actual = Number(qtyInput) || 0;
+    setItems(updatedItems);
+    setQtyInput("");
+
+    if (activeItemIndex < items.length - 1) {
+      setActiveItemIndex(activeItemIndex + 1);
     }
   };
 
-  const handleVerifikasi = () => {
-    setStep(3);
-  };
+  const handleNumpad = (num) => setQtyInput((prev) => prev + num);
+  const handleClear = () => setQtyInput("");
+  const handleDelete = () => setQtyInput((prev) => prev.slice(0, -1));
 
-  const handleTakeFoto = () => {
-    setPhotoTaken(true);
-  };
+  // --- KEYBOARD MOCK COMPONENT ---
+  const VirtualKeyboard = ({ value, setValue, onKeyPressCustom }) => {
+    const rows = [
+      ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+      ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+      ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+      ["SHIFT", "z", "x", "c", "v", "b", "n", "m", "⌫"],
+    ];
 
-  const handleSubmit = () => {
-    setStep(4);
-  };
+    const handleKeyPress = (key) => {
+      let newValue = value;
+      if (key === "⌫") newValue = value.slice(0, -1);
+      else if (key === "space") newValue = value + " ";
+      else if (key !== "SHIFT" && key !== "↵") newValue = value + key;
+      
+      setValue(newValue);
+      if (onKeyPressCustom) onKeyPressCustom(newValue);
+    };
 
-  const handleReset = () => {
-    setStep(1);
-    setQrInput("");
-    setPhotoTaken(false);
+    return (
+      <div className="flex flex-col gap-2 items-center w-full mt-2 select-none">
+        {rows.map((row, i) => (
+          <div key={i} className="flex gap-2 justify-center w-full">
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleKeyPress(key)}
+                className={`flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-[10px] text-[13px] font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-all ${
+                  key === "SHIFT" || key === "⌫" ? "px-4 min-w-[60px]" : "w-10 h-10"
+                }`}
+              >
+                {key === "⌫" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+                ) : (
+                  key
+                )}
+              </button>
+            ))}
+          </div>
+        ))}
+        {/* Row 5: Space & Enter */}
+        <div className="flex gap-2 justify-center w-full max-w-[440px]">
+          <button
+            onClick={() => handleKeyPress("space")}
+            className="flex-1 h-10 bg-white border border-gray-200 shadow-sm rounded-[10px] text-[13px] font-medium text-gray-500 hover:bg-gray-50 active:scale-95 transition-all"
+          >
+            space
+          </button>
+          <button
+            onClick={() => handleKeyPress("↵")}
+            className="w-14 h-10 flex items-center justify-center bg-white border border-gray-200 shadow-sm rounded-[10px] text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 10 4 15 9 20"></polyline><path d="M20 4v7a4 4 0 0 1-4 4H4"></path></svg>
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#f8fafc] p-6 flex gap-6 font-sans">
       
-      {/* Stepper */}
-      <div className="flex items-center justify-center pt-4 pb-8">
-        <div className="flex items-center w-full max-w-2xl">
-          {/* Step 1 */}
-          <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm ${step >= 1 ? 'bg-[#2cb2e0]' : 'bg-slate-200 text-slate-500'}`}>
-              1
-            </div>
-            <span className={`ml-3 text-sm font-bold ${step >= 1 ? 'text-slate-800' : 'text-slate-500'}`}>Scan QR</span>
+      {/* ================================================================= */}
+      {/* KIRI: AREA SCAN (Camera)                                          */}
+      {/* ================================================================= */}
+      <div className="flex-1 bg-[#0b1120] rounded-[24px] p-6 flex flex-col relative overflow-hidden text-white shadow-xl">
+        <div className="flex justify-between items-center z-10">
+          <div className="flex bg-slate-800/80 rounded-full p-1 border border-slate-700/50 backdrop-blur-sm">
+            <button
+              disabled={isScanned}
+              onClick={() => setActiveTab("scan")}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                activeTab === "scan" ? "bg-blue-600 text-white shadow-md" : "text-gray-400"
+              } ${isScanned ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-700/50"}`}
+            >
+              <img src="/ic_scan.jpg" alt="Scan Icon" className="w-4 h-4 object-contain rounded-sm" /> Scan QR
+            </button>
+            <button
+              disabled={!isScanned}
+              onClick={() => setActiveTab("hitung")}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                activeTab === "hitung" ? "bg-slate-700 text-white shadow-md" : "text-gray-400"
+              } ${!isScanned ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-700/50"}`}
+            >
+              <img src="/ic_camera.jpg" alt="Box Icon" className="w-4 h-4 object-contain rounded-sm" /> Hitung / Bukti
+            </button>
           </div>
-          <div className={`flex-1 h-[2px] mx-4 ${step >= 2 ? 'bg-[#2cb2e0]' : 'bg-slate-200'}`}></div>
-
-          {/* Step 2 */}
-          <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shadow-sm ${step >= 2 ? 'bg-[#2cb2e0]' : 'bg-slate-200 text-slate-500'}`}>
-              2
+          
+          {/* Status Badge Mengikuti Kondisi Scan */}
+          {isScanned ? (
+            <div className="flex items-center gap-2 text-xs font-semibold text-green-400 bg-slate-800/60 px-4 py-1.5 rounded-full border border-slate-700/50 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+              LIVE
             </div>
-            <span className={`ml-3 text-sm font-bold ${step >= 2 ? 'text-slate-800' : 'text-slate-500'}`}>Verifikasi</span>
+          ) : (
+            <div className="flex items-center gap-2 text-xs font-semibold text-amber-500 bg-slate-800/60 px-4 py-1.5 rounded-full border border-slate-700/50 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+              IDLE
+            </div>
+          )}
+        </div>
+
+        {/* TAMPILAN TENAH KAMERA BERDASARKAN TAB */}
+        {activeTab === "scan" ? (
+          <div className="flex-1 flex flex-col items-center justify-center relative z-10 w-full">
+            <div className={`border-2 border-blue-500 rounded-[28px] relative flex items-center justify-center transition-all duration-500 ${isScanned ? "w-48 h-48 mb-6 border-dashed opacity-40" : "w-72 h-72 mb-8 shadow-[0_0_40px_rgba(59,130,246,0.15)]"}`}>
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-2xl -ml-1 -mt-1"></div>
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-2xl -mr-1 -mt-1"></div>
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-2xl -ml-1 -mb-1"></div>
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-2xl -mr-1 -mb-1"></div>
+              {!isScanned && <div className="w-full h-[2px] bg-blue-400/80 absolute top-1/4 shadow-[0_0_15px_rgba(59,130,246,0.9)] animate-[bounce_2.5s_infinite]"></div>}
+              {isScanned && <div className="w-12 h-12 bg-slate-700/50 rounded-xl backdrop-blur-md"></div>}
+            </div>
+            
+            <p className="text-gray-400 text-sm mb-5 font-medium">Arahkan ke QR Code pada Box</p>
+            
+            {!isScanned && (
+              <button onClick={handleSimulasiScan} className="bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95">
+                <img src="/ic_scan.jpg" alt="Scan Action" className="w-4 h-4 object-contain invert brightness-200" /> Simulasikan Scan
+              </button>
+            )}
           </div>
-          <div className={`flex-1 h-[2px] mx-4 ${step >= 3 ? 'bg-[#2cb2e0]' : 'bg-slate-200'}`}></div>
+        ) : (
+          /* PENYESUAIAN FRAME SINKRON DENGAN image_416d78.jpg */
+          <div className="flex-1 flex flex-col items-center justify-center relative z-10 w-full px-8">
+            <div className="w-full aspect-square max-w-[350px] border border-dashed border-slate-700 rounded-2xl relative flex flex-col items-center justify-center p-6 bg-slate-900/10">
+              {/* Siku Pojok Biru */}
+              <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-blue-600"></div>
+              <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-blue-600"></div>
+              <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-blue-600"></div>
+              <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-blue-600"></div>
+              
+              {/* Kluster Ikon Wireframe 3D Box (SVG Kustom) */}
+              <svg width="76" height="76" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 mb-6 opacity-85">
+                {/* Balok Atas */}
+                <path d="M12 2L16 4.5L12 7L8 4.5L12 2Z" fill="rgba(255,255,255,0.03)" />
+                <path d="M8 4.5V9L12 11.5V7" />
+                <path d="M16 4.5V9L12 11.5" />
+                {/* Balok Kiri Bawah */}
+                <path d="M7 9.5L11 12L7 14.5L3 12L7 9.5Z" fill="rgba(255,255,255,0.03)" />
+                <path d="M3 12V16.5L7 19V14.5" />
+                <path d="M11 12V16.5L7 19" />
+                {/* Balok Kanan Bawah */}
+                <path d="M17 9.5L21 12L17 14.5L13 12L17 9.5Z" fill="rgba(255,255,255,0.03)" />
+                <path d="M13 12V16.5L17 19V14.5" />
+                <path d="M21 12V16.5L17 19" />
+              </svg>
 
-          {/* Step 3 */}
-          <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${step >= 3 ? 'bg-[#2cb2e0] text-white' : 'bg-slate-100 text-slate-500'}`}>
-              3
+              <p className="text-gray-200 text-[14px] font-bold text-center tracking-wide mb-1">
+                Tata barang dalam frame • Batch 1
+              </p>
+              <p className="text-gray-500 text-[11px] text-center max-w-[240px] leading-relaxed">
+                Sistem akan otomatis menyimpan foto saat Anda submit qty
+              </p>
             </div>
-            <span className={`ml-3 text-sm font-bold ${step >= 3 ? 'text-slate-800' : 'text-slate-500'}`}>Bukti</span>
           </div>
-          <div className={`flex-1 h-[2px] mx-4 ${step >= 4 ? 'bg-[#2cb2e0]' : 'bg-slate-200'}`}></div>
+        )}
 
-          {/* Step 4 */}
-          <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${step >= 4 ? 'bg-[#2cb2e0] text-white' : 'bg-slate-100 text-slate-500'}`}>
-              4
+        <div className="absolute bottom-6 left-6 right-6 flex justify-between text-[11px] font-medium text-gray-500 z-10 tracking-wider">
+          <span>🕒 {currentTime || "00:00:00"}</span>
+          <span>📍 {isScanned ? "-6.9175, 107.6191" : "—"}</span>
+          <span>📸 CAM-INB-01</span>
+        </div>
+      </div>
+
+      {/* ================================================================= */}
+      {/* KANAN: PANEL DATA & INPUT                                         */}
+      {/* ================================================================= */}
+      <div className="w-[420px] flex flex-col gap-4">
+        {/* Header Data */}
+        <div className="bg-white rounded-[20px] p-5 border border-gray-200/80 shadow-sm flex items-center min-h-[90px]">
+          {!isScanned ? (
+            <span className="text-gray-400 italic text-sm w-full text-center">— Menunggu Scan Box —</span>
+          ) : (
+            <div className="w-full">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">SHIPMENT</span>
+                <span className="bg-green-50 text-green-600 border border-green-100 text-[11px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">BOX-001</span>
+              </div>
+              <h2 className="text-lg font-black text-gray-800 tracking-tight">SHP-2026-001</h2>
+              <p className="text-[12px] text-gray-500 mt-0.5 font-medium">PT. Maju Komponen • PO 2026-001</p>
             </div>
-            <span className={`ml-3 text-sm font-bold ${step >= 4 ? 'text-slate-800' : 'text-slate-500'}`}>Hasil</span>
+          )}
+        </div>
+
+        {/* List Item Diharapkan */}
+        <div className="bg-white rounded-[20px] p-5 border border-gray-200/80 shadow-sm flex-1 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-[12px] font-bold text-gray-500 tracking-widest flex items-center gap-2 uppercase">
+              <img src="/ic_boxblue.jpg" alt="Box Icon" className="w-4 h-4 object-contain rounded-sm" /> ITEM DIHARAPKAN
+            </h3>
+            {isScanned && <span className="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-md">Batch aktif: 1</span>}
+          </div>
+
+          {!isScanned ? (
+            <div className="flex-1 border-2 border-dashed border-gray-200/80 rounded-2xl flex flex-col items-center justify-center p-6 text-center bg-gray-50/50">
+              <img src="/ic_boxblue.jpg" alt="Box Icon" className="w-12 h-12 mb-3 opacity-40 object-contain rounded-md" />
+              <p className="text-[13px] text-gray-400 font-medium">Scan QR Code box untuk melihat daftar item.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {items.map((item, index) => {
+                const percentage = Math.min((item.actual / item.expected) * 100, 100);
+                const isComplete = item.actual >= item.expected;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`p-3.5 rounded-[16px] border transition-all duration-300 cursor-pointer ${
+                      activeItemIndex === index
+                        ? "border-blue-400 bg-blue-50/40 shadow-sm ring-1 ring-blue-400/50"
+                        : "border-gray-200/80 hover:border-blue-300/50 hover:bg-gray-50/50"
+                    }`}
+                    onClick={() => setActiveItemIndex(index)}
+                  >
+                    <div className="flex justify-between items-start mb-2.5">
+                      <div>
+                        <h4 className="font-bold text-gray-800 text-[13px]">{item.name}</h4>
+                        <p className="text-[11px] text-gray-400 mt-0.5 font-mono">{item.code}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`font-black text-[14px] ${isComplete ? "text-green-600" : "text-gray-800"}`}>{item.actual}</span>
+                        <span className="text-gray-400 text-[12px] font-medium"> / {item.expected}</span>
+                        <span className="text-[10px] text-gray-400 ml-1 font-bold uppercase">pcs</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 ease-out ${isComplete ? "bg-green-500" : "bg-blue-500"}`}
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Numpad Input */}
+        <div className={`bg-white rounded-[20px] p-5 border border-gray-200/80 shadow-sm transition-opacity duration-300 ${!isScanned ? "opacity-50 pointer-events-none" : ""}`}>
+          
+          {/* JUDUL QTY AKTUAL DENGAN ANIMASI WARNA BIRU PADA ITEM */}
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center flex-wrap">
+              QTY AKTUAL 
+              {isScanned && (
+                <span className="text-blue-600 font-extrabold ml-1 normal-case tracking-normal transition-all duration-300 animate-[fadeIn_0.3s_ease-in-out]">
+                  — {items[activeItemIndex].name}
+                </span>
+              )}
+            </h3>
+            <span className="text-[10px] font-bold bg-gray-100 px-2 py-0.5 rounded-md text-gray-500 tracking-wider">Batch 1</span>
+          </div>
+
+          <div className="bg-[#f8fafc] border border-gray-200/60 rounded-2xl p-4 mb-4 flex justify-between items-center h-[60px] shadow-inner">
+            <span className="text-2xl font-black text-gray-800">{qtyInput || (isScanned ? "0" : "-")}</span>
+            <span className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">PCS</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+              <button
+                key={num}
+                onClick={() => handleNumpad(num.toString())}
+                className="py-3 bg-white border border-gray-200/80 rounded-[14px] hover:bg-gray-50 text-gray-700 font-bold text-lg transition-all shadow-sm active:scale-95"
+              >
+                {num}
+              </button>
+            ))}
+            <button onClick={handleClear} className="py-3 bg-orange-50 border border-orange-200/60 text-orange-600 rounded-[14px] hover:bg-orange-100 font-bold text-lg transition-all shadow-sm active:scale-95">
+              C
+            </button>
+            <button onClick={() => handleNumpad("0")} className="py-3 bg-white border border-gray-200/80 rounded-[14px] hover:bg-gray-50 text-gray-700 font-bold text-lg transition-all shadow-sm active:scale-95">
+              0
+            </button>
+            <button onClick={handleDelete} className="py-3 bg-white border border-gray-200/80 rounded-[14px] hover:bg-gray-50 text-gray-600 flex items-center justify-center transition-all shadow-sm active:scale-95">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            </button>
+          </div>
+
+          <button
+            onClick={handleSimpanBukti}
+            className="w-full bg-[#e2e8f0] text-gray-500 font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 mb-3 hover:bg-blue-500 hover:text-white shadow-sm active:scale-[0.98]"
+          >
+          Simpan & Ambil Bukti
+          </button>
+
+          <div className="flex gap-2">
+            <button onClick={() => setShowRejectModal(true)} className="flex-1 bg-white border border-red-200 text-red-500 hover:bg-red-50 font-bold py-3 rounded-[14px] text-[12px] transition-colors shadow-sm tracking-wide">
+              ✕ Reject
+            </button>
+            <button onClick={handleNextBatch} className="flex-1 bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 font-bold py-3 rounded-[14px] text-[12px] transition-colors shadow-sm tracking-wide">
+              › Next Batch
+            </button>
+            <button onClick={() => setShowFinishModal(true)} className="flex-1 bg-[#a7f3d0] hover:bg-[#86efac] text-[#065f46] font-bold py-3 rounded-[14px] text-[12px] transition-colors shadow-sm tracking-wide">
+              ✓ Finish
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Main Content Card */}
-      <div className="bg-white rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 p-8 max-w-3xl mx-auto">
-        
-        {/* === STEP 1: SCAN QR === */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3 mb-8">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 text-[#2cb2e0]">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
-              </svg>
-              Scan QR Code
-            </h2>
-
-            <div 
-              onClick={() => {
-                setQrInput("AIVAS-SHP2026001-BOX001");
-                setTimeout(() => setStep(2), 500); // Simulate processing time
-              }}
-              className="border-2 border-dashed border-slate-300 rounded-xl h-64 bg-[#f8fafc] flex flex-col items-center justify-center text-center px-4 cursor-pointer hover:bg-slate-50 hover:border-[#2cb2e0] transition-colors group"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-slate-400 mb-4 group-hover:text-[#2cb2e0] transition-colors">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
-              <p className="text-sm font-medium text-slate-500">Kamera akan aktif untuk scan QR</p>
-              <p className="text-xs text-slate-400 mt-1">(Simulasi: klik kotak ini atau masukkan manual di bawah)</p>
+      {/* ================================================================= */}
+      {/* MODAL REJECT                                                      */}
+      {/* ================================================================= */}
+      {showRejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-[900px] bg-white rounded-[24px] shadow-2xl flex flex-col p-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-xl font-extrabold text-gray-800 flex items-center gap-2.5 tracking-tight">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                  Reject Item
+                </h2>
+                <p className="text-sm text-gray-500 mt-1.5 font-medium">Item tidak sesuai sebelum perhitungan</p>
+                <div className="flex flex-wrap gap-2.5 mt-4 text-[12px]">
+                  <span className="bg-gray-50/80 px-3.5 py-1.5 rounded-full text-gray-500 border border-gray-200/80">Shipment: <strong className="text-gray-800 font-bold tracking-wide">SHP-2026-001</strong></span>
+                  <span className="bg-gray-50/80 px-3.5 py-1.5 rounded-full text-gray-500 border border-gray-200/80">Box: <strong className="text-gray-800 font-bold tracking-wide">BOX-001</strong></span>
+                </div>
+              </div>
+              <button onClick={() => { setShowRejectModal(false); setRejectError(false); }} className="text-sm font-semibold text-gray-500 hover:text-gray-800 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                ✕ Batal
+              </button>
             </div>
 
-            <div className="flex gap-3">
-              <input 
-                type="text" 
-                placeholder="Masukkan kode QR atau scan..." 
-                className="flex-1 border border-slate-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#2cb2e0] focus:ring-1 focus:ring-[#2cb2e0]"
-                value={qrInput}
-                onChange={(e) => setQrInput(e.target.value)}
-              />
-              <button 
-                onClick={() => {
-                  if (!qrInput.trim()) {
-                    setQrInput("AIVAS-SHP2026001-BOX001");
-                    setTimeout(() => setStep(2), 500);
-                  } else {
-                    setStep(2);
-                  }
-                }}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold text-white transition-all bg-[#38bdf8] hover:bg-[#0284c7]`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
-                </svg>
-                Scan
+            <div className="border border-gray-200 rounded-[20px] p-6 mb-6 bg-gray-50/30">
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                    Alasan Reject <span className="text-red-500 font-black text-sm">*</span>
+                  </label>
+                  {rejectError && <span className="text-xs font-bold text-red-500 animate-pulse"> Alasan wajib diisi!</span>}
+                </div>
+                <div className={`w-full bg-white border rounded-xl p-4 shadow-inner transition-all ${rejectError ? "border-red-400 bg-red-50/20" : "border-gray-200 focus-within:border-blue-400"}`}>
+                  <textarea 
+                    value={reasonInput} 
+                    readOnly 
+                    placeholder="Wajib menuliskan alasan reject di sini (mis. skrup yang datang berbeda ukuran atau cacat fisik)..." 
+                    className="w-full h-20 bg-transparent resize-none outline-none text-gray-700 text-[15px] placeholder-gray-400 font-medium" 
+                  />
+                </div>
+              </div>
+              <VirtualKeyboard value={reasonInput} setValue={setReasonInput} onKeyPressCustom={(val) => { if(val.trim()) setRejectError(false); }} />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-auto pt-2">
+              <button onClick={() => { setShowRejectModal(false); setRejectError(false); }} className="px-6 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors">
+                Kembali
+              </button>
+              <button onClick={handleSubmitReject} className="px-6 py-2.5 bg-[#d9534f] hover:bg-[#c9302c] text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-colors shadow-sm">
+                <div className="border-[1.5px] border-white/60 rounded-full w-[18px] h-[18px] flex items-center justify-center text-[10px]">✕</div> Submit Reject
               </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* === STEP 2: VERIFIKASI QTY === */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-slate-800">Verifikasi Qty Aktual</h2>
-              <p className="text-sm font-medium text-slate-400 mt-1">SHP-2026-001 • BOX-001 • PT. Maju Komponen</p>
+      {/* ================================================================= */}
+      {/* MODAL FINISH                                                      */}
+      {/* ================================================================= */}
+      {showFinishModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-[900px] max-h-[95vh] bg-white rounded-[24px] shadow-2xl flex flex-col p-8 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-xl font-extrabold text-gray-800 flex items-center gap-2.5 tracking-tight">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  Finish Verifikasi
+                </h2>
+                <p className="text-sm text-gray-500 mt-1.5 font-medium">Konfirmasi & tambahkan komentar hasil pengecekan</p>
+                <div className="flex flex-wrap gap-2.5 mt-4 text-[12px]">
+                  <span className="bg-gray-50/80 px-3.5 py-1.5 rounded-full text-gray-500 border border-gray-200/80">Shipment: <strong className="text-gray-800 font-bold tracking-wide">SHP-2026-001</strong></span>
+                  <span className="bg-gray-50/80 px-3.5 py-1.5 rounded-full text-gray-500 border border-gray-200/80">Box: <strong className="text-gray-800 font-bold tracking-wide">BOX-001</strong></span>
+                </div>
+              </div>
+              <button onClick={() => setShowFinishModal(false)} className="text-sm font-semibold text-gray-500 hover:text-gray-800 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                ✕ Batal
+              </button>
             </div>
 
-            <div className="space-y-4">
-              {/* Item 1 */}
-              <div className="border border-slate-300 rounded-xl p-5 bg-[#fafbfc]">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-bold text-slate-800 text-[15px]">Ink Cartridge Black</h3>
-                    <p className="text-xs text-slate-400 font-medium">EPN-INK-001</p>
+            <div className="border border-gray-200 rounded-[16px] mb-6 overflow-hidden shadow-sm">
+              <div className="bg-[#f8fafc] px-5 py-3 border-b border-gray-200 text-[11px] font-bold text-gray-500 tracking-widest uppercase">
+                RINGKASAN HITUNGAN
+              </div>
+              <div className="p-0 flex flex-col">
+                {items.map((item, idx) => (
+                  <div key={item.id} className={`flex justify-between items-center px-5 py-4 ${idx !== items.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                    <div>
+                      <h4 className="font-bold text-gray-800 text-[14px]">{item.name}</h4>
+                      <p className="text-[12px] text-gray-400 mt-0.5 font-mono">{item.code}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-black text-gray-800 text-[15px]">
+                        {item.actual} <span className="font-medium text-gray-400 text-[13px]">/ {item.expected} pcs</span>
+                      </div>
+                      {item.actual < item.expected && (
+                        <div className="text-[12px] font-medium text-red-500 mt-0.5">-{item.expected - item.actual} kurang</div>
+                      )}
+                    </div>
                   </div>
-                  <div className="px-3 py-1 rounded border border-slate-300 text-[10px] font-bold text-slate-600 bg-white shadow-sm">
-                    Deklarasi: 250 pcs
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <label className="text-[11px] font-bold text-slate-600 mb-1.5 block">Qty Aktual</label>
-                  <input type="number" defaultValue={250} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#2cb2e0] focus:ring-1 focus:ring-[#2cb2e0]" />
-                </div>
-              </div>
-
-              {/* Item 2 */}
-              <div className="border border-slate-300 rounded-xl p-5 bg-[#fafbfc]">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-bold text-slate-800 text-[15px]">Print Head Assembly</h3>
-                    <p className="text-xs text-slate-400 font-medium">EPN-PH-002</p>
-                  </div>
-                  <div className="px-3 py-1 rounded border border-slate-300 text-[10px] font-bold text-slate-600 bg-white shadow-sm">
-                    Deklarasi: 100 pcs
-                  </div>
-                </div>
-                <div className="mt-2">
-                  <label className="text-[11px] font-bold text-slate-600 mb-1.5 block">Qty Aktual</label>
-                  <input type="number" defaultValue={100} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#2cb2e0] focus:ring-1 focus:ring-[#2cb2e0]" />
-                </div>
+                ))}
               </div>
             </div>
 
-            <button 
-              onClick={handleVerifikasi}
-              className="w-full py-3 rounded-lg text-sm font-bold text-white transition-all bg-[#38bdf8] hover:bg-[#0284c7] mt-6 shadow-sm shadow-blue-500/20"
-            >
-              Lanjut ke Bukti Digital
-            </button>
-          </div>
-        )}
-
-        {/* === STEP 3: BUKTI DIGITAL === */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3 mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-[#38bdf8]">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
-              Ambil Bukti Digital
-            </h2>
-
-            {!photoTaken ? (
-              <div 
-                onClick={handleTakeFoto}
-                className="border-2 border-dashed border-slate-300 rounded-xl h-72 bg-[#fafbfc] flex flex-col items-center justify-center text-center px-4 cursor-pointer hover:bg-slate-50 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 text-slate-500 mb-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-                <p className="text-sm font-medium text-slate-500">Klik untuk ambil foto bukti</p>
-              </div>
-            ) : (
-              <div className="border-2 border-dashed border-green-400 rounded-xl h-72 bg-green-50 flex flex-col items-center justify-center text-center px-4">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border-2 border-green-500 mb-3 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-6 h-6 text-green-500">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
+            <div className="border border-gray-200 rounded-[20px] p-6 mb-6 bg-gray-50/30">
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  Komentar Verifikasi <span className="text-gray-400 font-normal lowercase">(opsional)</span>
+                </label>
+                <div className="w-full bg-white border border-gray-200 rounded-xl p-4 shadow-inner focus-within:border-blue-400 transition-colors">
+                  <textarea 
+                    value={finishComment} 
+                    readOnly 
+                    placeholder="Tuliskan catatan tambahan mengenai kondisi box, segel, atau catatan lain untuk supervisor..." 
+                    className="w-full h-16 bg-transparent resize-none outline-none text-gray-700 text-[15px] placeholder-gray-400 font-medium" 
+                  />
                 </div>
-                <p className="text-sm font-bold text-green-600">Foto berhasil diambil</p>
               </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative">
-                <div className="absolute top-2 left-3 flex items-center gap-1.5 text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Timestamp</span>
-                </div>
-                <input 
-                  type="text" 
-                  disabled 
-                  value={currentTime || "24/4/2026, 20.48.31"} 
-                  className="w-full border border-slate-300 rounded-lg pl-3 pr-3 pt-7 pb-2 text-xs font-medium text-slate-600 bg-[#fafbfc]" 
-                />
-              </div>
-              <div className="relative">
-                <div className="absolute top-2 left-3 flex items-center gap-1.5 text-slate-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                  </svg>
-                  <span className="text-[9px] font-bold uppercase tracking-wider">GPS Location</span>
-                </div>
-                <input 
-                  type="text" 
-                  disabled 
-                  value="-6.9175, 107.6191" 
-                  className="w-full border border-slate-300 rounded-lg pl-3 pr-3 pt-7 pb-2 text-xs font-medium text-slate-600 bg-[#fafbfc]" 
-                />
-              </div>
+              <VirtualKeyboard value={finishComment} setValue={setFinishComment} />
             </div>
 
-            <button 
-              onClick={handleSubmit}
-              disabled={!photoTaken}
-              className={`w-full py-3 rounded-lg text-sm font-bold text-white transition-all mt-6 shadow-sm shadow-blue-500/20 ${photoTaken ? 'bg-[#38bdf8] hover:bg-[#0284c7]' : 'bg-slate-300 cursor-not-allowed'}`}
-            >
-              Submit Verifikasi
-            </button>
-          </div>
-        )}
-
-        {/* === STEP 4: HASIL (SUCCESS) === */}
-        {step === 4 && (
-          <div className="flex flex-col items-center justify-center text-center space-y-6 py-12">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center border-4 border-emerald-50 mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-10 h-10 text-emerald-500">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Verifikasi Berhasil!</h2>
-              <p className="text-sm text-slate-500">Data penerimaan barang telah disubmit ke dalam sistem AIVAS.</p>
-            </div>
-            <div className="w-full max-w-sm bg-slate-50 border border-slate-100 rounded-xl p-4 text-left space-y-2 mt-4">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">ID Shipment:</span>
-                <span className="font-bold text-slate-800">SHP-2026-001</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Box ID:</span>
-                <span className="font-bold text-slate-800">BOX-001</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Status:</span>
-                <span className="font-bold text-emerald-600">Verified</span>
-              </div>
-            </div>
-            <div className="pt-6 w-full flex flex-col sm:flex-row gap-3">
-               <button 
-                onClick={handleReset}
-                className="flex-1 py-3 rounded-lg text-sm font-bold text-white transition-all bg-[#38bdf8] hover:bg-[#0284c7] shadow-sm shadow-blue-500/20"
-              >
-                Scan Tiket Lain
+            <div className="flex justify-end gap-3 mt-auto pt-2">
+              <button onClick={() => setShowFinishModal(false)} className="px-6 py-2.5 border border-gray-200 rounded-xl text-gray-700 font-bold text-sm hover:bg-gray-50 transition-colors">
+                Kembali
+              </button>
+              <button onClick={handleFinish} className="px-6 py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white rounded-xl font-bold text-sm flex items-center gap-2 transition-colors shadow-sm">
+                ✓ Konfirmasi & Simpan
               </button>
             </div>
           </div>
-        )}
-
-      </div>
+        </div>
+      )}
     </div>
   );
 }

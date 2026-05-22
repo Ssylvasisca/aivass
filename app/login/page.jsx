@@ -99,7 +99,7 @@ function LoginContent() {
             <div className="flex justify-end">
               <button 
                 type="button"
-                onClick={() => alert("Silahkan hubungi Admin Inbound untuk reset password.")}
+                onClick={() => alert("Silahkan hubungi Admin untuk reset password.")}
                 className="text-xs font-semibold text-gray-400 hover:text-blue-600 transition-colors"
               >
                 Lupa Password?
