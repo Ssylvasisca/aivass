@@ -27,8 +27,8 @@ function LoginContent() {
   return (
     <div className="flex h-screen bg-[#1e3a8a]">
       
-      {/* Bagian Kiri (Form Login) */}
-      <div className="w-1/2 flex flex-col justify-center items-center bg-gradient-to-tr from-[#eef6ff] via-[#f8fbff] to-white">
+      {/* Bagian Kiri (Form Login) - Diubah: w-full md:w-1/2 p-6 */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-gradient-to-tr from-[#eef6ff] via-[#f8fbff] to-white p-6 md:p-0">
         <div className="w-full max-w-sm">
           
           {/* Logo */}
@@ -64,7 +64,7 @@ function LoginContent() {
             <div>
               <label className="block text-sm font-bold text-gray-800 mb-1.5">Kata Sandi</label>
               <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center">
                   <img 
                     src="/ic_key.jpg" 
                     alt="Password Icon" 
@@ -84,7 +84,7 @@ function LoginContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 hover:scale-110 transition-transform"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hover:scale-110 transition-transform flex items-center justify-center"
                 >
                   <img 
                     src="/ic_visability.jpg" 
@@ -119,8 +119,8 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* Bagian Kanan (Gambar Gedung) */}
-      <div className="w-1/2 bg-gradient-to-br from-[#1a2f4c] to-[#0a4b9c] p-8 flex items-center justify-center">
+      {/* Bagian Kanan (Gambar Gedung) - Diubah: ditambahkan hidden md:flex */}
+      <div className="hidden md:flex w-1/2 bg-gradient-to-br from-[#1a2f4c] to-[#0a4b9c] p-8 items-center justify-center">
         <div className="w-full h-full max-h-[85vh] rounded-3xl overflow-hidden  relative border-4 border-transparent">
           <img 
             src="/gedungepson.jpg" 

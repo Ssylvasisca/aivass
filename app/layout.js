@@ -15,7 +15,7 @@ export const metadata = {
   title: "AIVAS",
   description: "AIVAS Portal",
   icons: {
-    icon: "/logoaivas.jpg",
+    icon: "/logo.png",
   },
 };
 

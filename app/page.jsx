@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -26,15 +27,15 @@ export default function PilihRolePage() {
       {/* Header / Logo */}
       <div className="flex flex-col items-center mb-10">
         <div className="flex items-center gap-2 mb-2">
-          <img src="/logo.jpg" alt="Logo" className="w-full h-full object-contain mix-blend-screen" />
+          <img src="/logo.jpg" alt="Logo" className="w-12 h-12 object-contain mix-blend-screen" />
           <h1 className="text-3xl font-bold">AIVAS</h1>
         </div>
-        <p className="text-gray-300">Automated Inbound Verification & Analytics System</p>
-        <p className="text-gray-400 text-sm">PT. Indonesia Epson Industry</p>
+        <p className="text-gray-300 text-center">Automated Inbound Verification & Analytics System</p>
+        <p className="text-gray-400 text-sm mt-1">PT. Indonesia Epson Industry</p>
       </div>
 
-      {/* Grid Menu Role */}
-      <div className="grid grid-cols-2 gap-4 max-w-2xl w-full px-4">
+      {/* Grid Menu Role - HANYA BARIS INI YANG DIUBAH MENJADI RESPONSIVE (grid-cols-1 md:grid-cols-2) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full px-4">
         {daftarRole.map((role) => (
           <div
             key={role.id}
@@ -50,7 +51,7 @@ export default function PilihRolePage() {
         ))}
       </div>
 
-      {/* Tombol Masuk (Muncuk jika ada role yang dipilih) */}
+      {/* Tombol Masuk (Muncul jika ada role yang dipilih) */}
       {roleTerpilih && (
         <button
           onClick={handleLanjut}
@@ -59,6 +60,7 @@ export default function PilihRolePage() {
           Masuk sebagai {daftarRole.find((r) => r.id === roleTerpilih)?.title}
         </button>
       )}
+
     </div>
   );
 }
