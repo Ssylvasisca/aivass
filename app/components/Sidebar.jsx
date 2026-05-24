@@ -98,7 +98,7 @@ export default function Sidebar() {
       {/* TOP BAR KHUSUS MOBILE (Warna sesuai gradient asli) */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-[#1a2f4c] to-[#0a4b9c] text-white flex items-center justify-between px-5 z-[60] shadow-md w-full">
         <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="AIVAS Logo" className="h-8 w-auto object-contain mix-blend-screen" />
+          <img src="/logo.png" alt="AIVAS Logo" className="h-8 w-auto object-contain mix-blend-screen" />
           <h1 className="text-lg font-bold tracking-tight leading-none">AIVAS</h1>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 focus:outline-none">
