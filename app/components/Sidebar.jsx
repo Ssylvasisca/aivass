@@ -121,7 +121,7 @@ export default function Sidebar() {
         {/* Logo & Header Sidebar */}
         <div className="p-6 pb-2 mt-2 lg:mt-0 hidden lg:block">
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="AIVAS Logo" className="h-10 w-auto object-contain mix-blend-screen" />
+            <img src="/logo.png" alt="AIVAS Logo" className="h-10 w-auto object-contain mix-blend-screen" />
             <h1 className="text-[25px] font-bold tracking-tight leading-none">AIVAS</h1>
           </div>
         </div>
